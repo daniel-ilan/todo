@@ -101,7 +101,7 @@ const Main = () => {
               <Button variant='contained' color='primary' onClick={handleClickOpen}>
                 פרויקט חדש
               </Button>
-              <Dialog cbFunc={addNewProject} open={openDialog} setOpen={setOpenDialog} />
+              <Dialog cbFunc={addNewProject} open={openDialog} setOpen={setOpenDialog} text={{ label: 'שם פרויקט:' }} />
             </Grid>
           </Grid>
         </Container>

@@ -60,3 +60,11 @@ export const getSelectProjectRef = (projectKey: string) => {
     const projectsRef = database.ref('projects/' + projectKey);
     return projectsRef;
 }
+
+export const deleteTask = (projectKey: string, card: string, taskId: string) => {
+    console.log("projectKey", projectKey)
+    console.log("card", card)
+    console.log("taskId", taskId)
+    const projectTodoRef = database.ref(`projects/${projectKey}/todos/${card}/${taskId}`);
+    projectTodoRef.remove()
+}

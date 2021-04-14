@@ -19,7 +19,7 @@ export default function FormDialog({ ...props }) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const classes = useStyles();
-  const { cbFunc, open, setOpen } = props;
+  const { cbFunc, open, setOpen, text } = props;
 
   const handleClose = () => {
     setOpen(false);
@@ -39,7 +39,7 @@ export default function FormDialog({ ...props }) {
   return (
     <>
       <Dialog open={open} onClose={handleClose} fullScreen={fullScreen} aria-labelledby='form-dialog-title'>
-        <DialogTitle id='form-dialog-title'>שם פרויקט</DialogTitle>
+        <DialogTitle id='form-dialog-title'>{text.label}</DialogTitle>
         <DialogContent className={classes.dialog}>
           <TextField
             autoFocus
@@ -47,7 +47,7 @@ export default function FormDialog({ ...props }) {
             margin='dense'
             id='projectName'
             name='projectName'
-            label='שם פרויקט'
+            label={text.label}
             type='text'
             fullWidth
           />

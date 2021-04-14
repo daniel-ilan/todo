@@ -80,6 +80,8 @@ export default function Cards({ ...props }) {
                 selectedProject={selectedProject}
                 setSelectedProject={setSelectedProject}
                 todos={selectedProject.todos[card]}
+                projectKey={projectKey}
+                card={card}
               />
             )}
           </List>
@@ -93,7 +95,7 @@ export default function Cards({ ...props }) {
           startIcon={<AddCircleOutlineRounded className={classes.buttonIcon} />}>
           הוסף
         </Button>
-        <Dialog cbFunc={onAddNewTask} open={openDialog} setOpen={setOpenDialog} />
+        <Dialog cbFunc={onAddNewTask} open={openDialog} setOpen={setOpenDialog} text={{ label: 'משימה:' }} />
       </Card>
     </Grid>
   );
