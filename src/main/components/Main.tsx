@@ -1,7 +1,20 @@
-import React from 'react';
-import { Container, Grid, makeStyles, Theme, Button } from '@material-ui/core';
+import React, { useEffect, useState } from 'react';
+import { Button, Container, Grid, makeStyles, Theme, Typography } from '@material-ui/core';
+import { addNewProject, getSelectProjectRef } from '../fireBaseMethods';
 import Header from './Header';
-import { addNewProject } from 'main/fireBaseMethods';
+import Dialog from './Dialog';
+import { isEqual } from 'lodash';
+import Cards from './Cards';
+
+type todoType = {
+  status: string;
+};
+
+interface Iproject {
+  name?: string;
+  users?: string[];
+  todos?: todoType[];
+}
 
 const useStyles = makeStyles((theme: Theme) => ({
   wrapper: {
@@ -37,25 +50,58 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 const Main = () => {
   const classes = useStyles();
-
-  const handleNewProject = () => {
-    addNewProject('new test project');
+  const [selectedProject, setSelectedProject] = useState<Iproject | null>(null);
+  const [projectKeyRef, setProjectKeyRef] = useState('');
+  const onSelectProject = (projectKey: string) => {
+    setProjectKeyRef(projectKey);
+    const projectRef = getSelectProjectRef(projectKey);
+    projectRef.on('value', (snapshot: any) => {
+      setSelectedProject(snapshot.val());
+    });
   };
+
+  const [openDialog, setOpenDialog] = React.useState(false);
+  const handleClickOpen = () => {
+    setOpenDialog(true);
+  };
+
+  useEffect(() => {
+    if (!selectedProject) setSelectedProject(null);
+    setSelectedProject(selectedProject);
+    console.log('selectedProject', selectedProject);
+  }, [selectedProject]);
 
   return (
     <div className={classes.wrapper}>
-      <Header />
+      <Header onSelectProject={onSelectProject} />
       <main className={classes.main}>
         <div className={classes.toolbar}></div>
         <Container>
           <Grid container spacing={4}>
-            <Grid item xs={12} sm={6} md={4}>
-              <div>פרויקט!</div>
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <Button variant='contained' color='primary' onClick={() => handleNewProject()}>
-                הוסף פפרויקט
+            {selectedProject && (
+              <>
+                <Grid item xs={12}>
+                  <Typography variant='h3'>{selectedProject.name}</Typography>
+                </Grid>
+                {selectedProject &&
+                  ['new', 'doing', 'done'].map((cardName: string, index: number) => {
+                    return (
+                      <Cards
+                        key={index}
+                        selectedProject={selectedProject}
+                        setSelectedProject={setSelectedProject}
+                        card={cardName}
+                        projectKey={projectKeyRef}
+                      />
+                    );
+                  })}
+              </>
+            )}
+            <Grid item xs={12}>
+              <Button variant='contained' color='primary' onClick={handleClickOpen}>
+                פרויקט חדש
               </Button>
+              <Dialog cbFunc={addNewProject} open={openDialog} setOpen={setOpenDialog} />
             </Grid>
           </Grid>
         </Container>
