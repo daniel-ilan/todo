@@ -83,7 +83,7 @@ const Header = ({ ...props }) => {
   };
 
   const handleLogOut = () => {
-    history.push('/login');
+    history.push('/');
     signout();
   };
   return (
