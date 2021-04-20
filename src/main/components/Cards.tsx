@@ -1,10 +1,11 @@
-import ListItems from './ListItems';
+import Task from './Task';
 import { makeStyles } from '@material-ui/core/styles';
 import React from 'react';
-import { CardHeader, Card, CardContent, Typography, Grid, List, IconButton, Button } from '@material-ui/core';
+import { CardHeader, Card, CardContent, Grid, List, Button } from '@material-ui/core';
 import { AddCircleOutlineRounded } from '@material-ui/icons';
 import { addTask } from 'main/fireBaseMethods';
 import Dialog from './Dialog';
+import { Droppable } from 'react-beautiful-dnd';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -49,7 +50,7 @@ interface IaddTask {
 
 export default function Cards({ ...props }) {
   const classes = useStyles();
-  const { selectedProject, setSelectedProject, card, projectKey } = props;
+  const { selectedProject, cardName, projectKey } = props;
   const titles: Ititles = {
     new: 'חדש',
     doing: 'בעשייה',
@@ -60,11 +61,12 @@ export default function Cards({ ...props }) {
   const handleClickOpen = () => {
     setOpenDialog(true);
   };
+  const todos = selectedProject.todos[cardName];
 
   const onAddNewTask = (name: string) => {
     const newTask: IaddTask = {
       projectKey,
-      board: card,
+      board: cardName,
       name,
     };
     addTask(newTask);
@@ -72,19 +74,26 @@ export default function Cards({ ...props }) {
   return (
     <Grid item xs={12} md={4}>
       <Card className={classes.card}>
-        <CardHeader title={titles[card]} />
+        <CardHeader title={titles[cardName]} />
         <CardContent className={classes.cardContent}>
-          <List className={classes.list} dir='rtl'>
-            {card in selectedProject.todos && (
-              <ListItems
-                selectedProject={selectedProject}
-                setSelectedProject={setSelectedProject}
-                todos={selectedProject.todos[card]}
-                projectKey={projectKey}
-                card={card}
-              />
+          <Droppable droppableId={cardName}>
+            {(provided) => (
+              <List className={classes.list} dir='rtl' {...provided.droppableProps} innerRef={provided.innerRef}>
+                {cardName in selectedProject.todos &&
+                  Object.keys(todos).map((key: string, index: number) => {
+                    return (
+                      <Task
+                        taskId={key}
+                        projectKey={projectKey}
+                        cardName={cardName}
+                        task={todos[key]}
+                        index={index}></Task>
+                    );
+                  })}
+                {provided.placeholder}
+              </List>
             )}
-          </List>
+          </Droppable>
         </CardContent>
         <Button
           variant='contained'

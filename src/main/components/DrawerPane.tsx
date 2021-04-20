@@ -64,6 +64,7 @@ const DrawerPane = ({ ...props }) => {
 
   const handleLoadProject = (key: string) => {
     onSelectProject(key);
+    handleCloseMenu();
   };
 
   const handleCloseMenu = () => {

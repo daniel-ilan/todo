@@ -7,7 +7,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { useTheme, makeStyles } from '@material-ui/core/styles';
-import { addNewProject } from 'main/fireBaseMethods';
+
 const useStyles = makeStyles((theme) => ({
   dialog: {
     minWidth: '450px',

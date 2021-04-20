@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -6,21 +6,26 @@ import { ListItemIcon } from '@material-ui/core';
 import { DeleteForever } from '@material-ui/icons';
 import AlertDialog from './AlertDialog';
 import { deleteTask } from 'main/fireBaseMethods';
+import { Draggable } from 'react-beautiful-dnd';
 const useStyles = makeStyles((theme) => ({
   listItem: {
     textAlign: 'right',
   },
 }));
 
-export default function CheckboxList({ ...props }) {
+export default function Task({ ...props }) {
   const classes = useStyles();
-  const [checked, setChecked] = useState([0]);
   const [open, setOpen] = useState(false);
-  const [taskId, setTaskId] = useState('');
-  const { selectedProject, setSelectedProject, projectKey, card } = props;
-  const { todos } = props;
-
+  const { projectKey, cardName, task, taskId, index } = props;
   const alertText = 'למחוק את המשימה סופית? לא יהיה ניתן לשחזר את המשימה לאחר פעולה זאת';
+  const handleDeleteTask = () => {
+    deleteTask(projectKey, cardName, taskId);
+  };
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  /*
   const handleToggle = (todoIndex: number) => () => {
     const currentIndex = checked.indexOf(todoIndex);
     const newChecked = [...checked];
@@ -33,16 +38,7 @@ export default function CheckboxList({ ...props }) {
     setChecked(newChecked);
   };
 
-  const handleDeleteTask = () => {
-    deleteTask(projectKey, card, taskId);
-  };
-  const handleClickOpen = (id: string) => {
-    setOpen(true);
-    setTaskId(id);
-  };
-  console.log('todos', todos);
-
-  /*   useEffect(() => {
+  useEffect(() => {
     setSelectedProject({ ...selectedProject, todos });
   }, [selectedProject, setSelectedProject, todos]); */
   /* todos: {
@@ -51,19 +47,22 @@ export default function CheckboxList({ ...props }) {
     doing [{todo}, {todo}, {todo}, ]
 } */
   return (
-    <>
-      {Object.keys(todos).map((key: string, index: number) => {
-        const labelId = `checkbox-list-label-${index}`;
-        return (
-          <ListItem key={index} role={undefined} button className={classes.listItem}>
-            <ListItemText id={labelId} primary={todos[key].name} />
-            <ListItemIcon onClick={() => handleClickOpen(key)}>
-              <DeleteForever />
-            </ListItemIcon>
-          </ListItem>
-        );
-      })}
-      <AlertDialog open={open} setOpen={setOpen} text={alertText} cbFunc={handleDeleteTask} />
-    </>
+    <Draggable draggableId={taskId} index={index}>
+      {(provided) => (
+        <ListItem
+          role={undefined}
+          button
+          className={classes.listItem}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          innerRef={provided.innerRef}>
+          <ListItemText primary={task.name} />
+          <ListItemIcon onClick={() => handleClickOpen()}>
+            <DeleteForever />
+          </ListItemIcon>
+          <AlertDialog open={open} setOpen={setOpen} text={alertText} cbFunc={handleDeleteTask} />
+        </ListItem>
+      )}
+    </Draggable>
   );
 }

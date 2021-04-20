@@ -3,8 +3,8 @@ import { Button, Container, Grid, makeStyles, Theme, Typography } from '@materia
 import { addNewProject, getSelectProjectRef } from '../fireBaseMethods';
 import Header from './Header';
 import Dialog from './Dialog';
-import { isEqual } from 'lodash';
 import Cards from './Cards';
+import { DragDropContext } from 'react-beautiful-dnd';
 
 type todoType = {
   status: string;
@@ -65,6 +65,10 @@ const Main = () => {
     setOpenDialog(true);
   };
 
+  const HandleDragEnd = () => {
+    console.log('drag ended!');
+  };
+
   useEffect(() => {
     if (!selectedProject) setSelectedProject(null);
     setSelectedProject(selectedProject);
@@ -86,13 +90,14 @@ const Main = () => {
                 {selectedProject &&
                   ['new', 'doing', 'done'].map((cardName: string, index: number) => {
                     return (
-                      <Cards
-                        key={index}
-                        selectedProject={selectedProject}
-                        setSelectedProject={setSelectedProject}
-                        card={cardName}
-                        projectKey={projectKeyRef}
-                      />
+                      <DragDropContext onDragEnd={HandleDragEnd}>
+                        <Cards
+                          key={index}
+                          selectedProject={selectedProject}
+                          cardName={cardName}
+                          projectKey={projectKeyRef}
+                        />
+                      </DragDropContext>
                     );
                   })}
               </>
