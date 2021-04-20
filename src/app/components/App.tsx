@@ -12,7 +12,7 @@ const App = () => {
     <UserProvideer>
       <Container>
         <Switch>
-          <Route path='/login'>
+          <Route exact path='/'>
             <Login />
             <Footer />
           </Route>

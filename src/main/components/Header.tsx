@@ -2,25 +2,9 @@ import React, { useState } from 'react';
 import clsx from 'clsx';
 import { useHistory } from 'react-router-dom';
 import { useAuth } from 'shared/providers/firebaseAuthProvider';
-import {
-  Drawer,
-  makeStyles,
-  Typography,
-  Toolbar,
-  IconButton,
-  AppBar,
-  Button,
-  Divider,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Box,
-} from '@material-ui/core';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import MailIcon from '@material-ui/icons/Mail';
+import { makeStyles, Typography, Toolbar, IconButton, AppBar, Button, Box } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
+import DrawerPane from './DrawerPane';
 
 const useStyles = makeStyles((theme) => ({
   icon: {
@@ -71,14 +55,7 @@ const useStyles = makeStyles((theme) => ({
       width: theme.spacing(9) + 1,
     },
   },
-  toolbar: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    padding: theme.spacing(0, 1),
-    // necessary for content to be below app bar
-    ...theme.mixins.toolbar,
-  },
+
   buttonsWrapper: {
     display: 'flex',
     width: '30%',
@@ -91,7 +68,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Header = () => {
+const Header = ({ ...props }) => {
+  const { onSelectProject } = props;
   const signout = useAuth()!.signout;
   const [isDrawerOpen, SetIsDrawerOpen] = useState(false);
   const history = useHistory();
@@ -136,31 +114,7 @@ const Header = () => {
           </Button>
         </Toolbar>
       </AppBar>
-      <Drawer
-        variant='permanent'
-        className={clsx(classes.drawer, {
-          [classes.drawerOpen]: isDrawerOpen,
-          [classes.drawerClose]: !isDrawerOpen,
-        })}
-        classes={{
-          paper: clsx({
-            [classes.drawerOpen]: isDrawerOpen,
-            [classes.drawerClose]: !isDrawerOpen,
-          }),
-        }}>
-        <div className={classes.toolbar}>
-          <IconButton onClick={handleDrawerClose}>{<ChevronRightIcon />}</IconButton>
-        </div>
-        <Divider />
-        <List>
-          {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
-          ))}
-        </List>
-      </Drawer>
+      <DrawerPane isDrawerOpen={isDrawerOpen} handleDrawerClose={handleDrawerClose} onSelectProject={onSelectProject} />
     </>
   );
 };
