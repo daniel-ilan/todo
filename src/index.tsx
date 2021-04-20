@@ -8,7 +8,7 @@ import App from './app';
 
 ReactDOM.render(
   <ThemeProvider theme={theme}>
-    <Router>
+    <Router basename='/todo'>
       <CssBaseline />
       <App />
     </Router>
