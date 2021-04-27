@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Main from 'main';
 const Todos = () => {
   /* const [currentProject, setCurrentProject] = useState(null); */

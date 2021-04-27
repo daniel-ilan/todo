@@ -61,6 +61,7 @@ const Signup = ({ ...props }) => {
   const history = useHistory();
 
   const handleSignup = (event: any, email: string, password: string, displayName: string) => {
+    console.log(error);
     event.preventDefault();
     setError('');
     setLoading(true);

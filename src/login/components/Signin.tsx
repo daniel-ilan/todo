@@ -57,6 +57,7 @@ const Signin = ({ ...props }) => {
   const history = useHistory();
 
   const handleSignIn = (event: any, email: string, password: string) => {
+    console.log(error);
     event.preventDefault();
     setError('');
     setLoading(true);
@@ -67,6 +68,7 @@ const Signin = ({ ...props }) => {
       })
       .catch((error) => {
         setError(error.message);
+        console.log(error);
         setLoading(false);
       });
     setEmail('');
