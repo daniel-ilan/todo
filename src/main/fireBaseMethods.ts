@@ -15,7 +15,7 @@ export const initUserData = (userData: Types.initUserType) => {
     });
 }
 
-export const addNewProject = (projectName: string) => {
+export const addNewProject = async (projectName: string) => {
     const userId = auth.currentUser!.uid;
 
     const projectData: Types.projectDataType = {
@@ -33,7 +33,7 @@ export const addNewProject = (projectName: string) => {
     const userRef = database.ref('users/' + userId + '/projects');
 
     const projectKey = database.ref().child('projects').push().key;
-    database.ref('projects/' + projectKey).update({
+    await database.ref('projects/' + projectKey).update({
         ...projectData
     }, (error) => {
         if (error) {
@@ -43,6 +43,7 @@ export const addNewProject = (projectName: string) => {
             userRef.child(projectKey!).set(projectName);
         }
     });
+    return projectKey;
 }
 
 export const addTask = ({ projectKey, board, name }: IaddTask) => {

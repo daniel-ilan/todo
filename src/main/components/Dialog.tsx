@@ -19,7 +19,7 @@ export default function FormDialog({ ...props }) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const classes = useStyles();
-  const { cbFunc, open, setOpen, text } = props;
+  const { cbFunc, open, setOpen, text, onSelectProject } = props;
 
   const handleClose = () => {
     setOpen(false);
@@ -32,7 +32,11 @@ export default function FormDialog({ ...props }) {
 
   const handleModelClose = (event: any, name: string) => {
     event.preventDefault();
-    cbFunc(name);
+    cbFunc(name)
+      .then((projectKey: string) => {
+        onSelectProject(projectKey);
+      })
+      .catch((err: string) => console.log(err));
     handleClose();
   };
 

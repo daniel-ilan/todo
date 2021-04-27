@@ -4,7 +4,7 @@ import { addNewProject, getSelectProjectRef, reOrderTasks } from '../fireBaseMet
 import Header from './Header';
 import Dialog from './Dialog';
 import Cards from './Cards';
-import { DragDropContext, DroppableId, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 
 interface taskType {
   name: string;
@@ -173,7 +173,13 @@ const Main = () => {
               <Button variant='contained' color='primary' onClick={handleClickOpen}>
                 פרויקט חדש
               </Button>
-              <Dialog cbFunc={addNewProject} open={openDialog} setOpen={setOpenDialog} text={{ label: 'שם פרויקט:' }} />
+              <Dialog
+                cbFunc={addNewProject}
+                onSelectProject={onSelectProject}
+                open={openDialog}
+                setOpen={setOpenDialog}
+                text={{ label: 'שם פרויקט:' }}
+              />
             </Grid>
           </Grid>
         </Container>
