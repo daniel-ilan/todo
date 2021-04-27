@@ -47,7 +47,7 @@ export default function Task({ ...props }) {
     doing [{todo}, {todo}, {todo}, ]
 } */
   return (
-    <Draggable draggableId={taskId} index={index}>
+    <Draggable draggableId={taskId} index={index} key={taskId}>
       {(provided) => (
         <ListItem
           role={undefined}

@@ -23,6 +23,7 @@ const useStyles = makeStyles((theme) => ({
   list: {
     width: '100%',
     maxWidth: 360,
+    height: '100%',
     backgroundColor: theme.palette.background.paper,
   },
   button: {
@@ -87,7 +88,8 @@ export default function Cards({ ...props }) {
                         projectKey={projectKey}
                         cardName={cardName}
                         task={todos[key]}
-                        index={index}></Task>
+                        index={index}
+                        key={index}></Task>
                     );
                   })}
                 {provided.placeholder}

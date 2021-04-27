@@ -1,19 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Container, Grid, makeStyles, Theme, Typography } from '@material-ui/core';
-import { addNewProject, getSelectProjectRef } from '../fireBaseMethods';
+import { addNewProject, getSelectProjectRef, reOrderTasks } from '../fireBaseMethods';
 import Header from './Header';
 import Dialog from './Dialog';
 import Cards from './Cards';
-import { DragDropContext } from 'react-beautiful-dnd';
+import { DragDropContext, DroppableId, DropResult } from 'react-beautiful-dnd';
 
-type todoType = {
-  status: string;
-};
+interface taskType {
+  name: string;
+  owner: string;
+  id: string;
+  [key: string]: any;
+}
+
+interface todoType {
+  status: taskType;
+  [key: string]: any;
+}
 
 interface Iproject {
-  name?: string;
-  users?: string[];
-  todos?: todoType[];
+  name: string;
+  users: string[];
+  todos: todoType;
+  [key: string]: any;
 }
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -65,8 +74,65 @@ const Main = () => {
     setOpenDialog(true);
   };
 
-  const HandleDragEnd = () => {
-    console.log('drag ended!');
+  const HandleDragEnd = (result: DropResult) => {
+    const { destination, source, draggableId } = result;
+    if (!destination) return;
+    if (destination.droppableId === source.droppableId && destination.index === source.index) {
+      return;
+    }
+    const startColumn = selectedProject!.todos[source.droppableId];
+    const endColumn = selectedProject!.todos[destination.droppableId]
+      ? selectedProject!.todos[destination.droppableId]
+      : {};
+    console.log('startColumn', startColumn);
+    console.log('endColumn', endColumn);
+    if (endColumn === startColumn) {
+      console.log('reorder same column!');
+      /* const tasksArray = Object.keys(startColumn);
+      tasksArray.splice(source.index, 1);
+    tasksArray.splice(destination.index, 0, draggableId);
+
+    const newColumn = Object.fromEntries(
+      tasksArray.map((value: string) => {
+        return [value, { name: startColumn[value].name, owner: startColumn[value].owner }];
+      }),
+    );
+    reOrderTasks(projectKeyRef, source.droppableId, newColumn); */
+      return;
+    }
+
+    const newStartTasks = Object.keys(startColumn);
+    newStartTasks.splice(source.index, 1);
+    console.log('newStartTasks', newStartTasks);
+
+    const newEndTasks = Object.keys(endColumn);
+    newEndTasks.splice(source.index, 0, draggableId);
+    console.log('newEndTasks', newEndTasks);
+
+    const newStartColumn = Object.fromEntries(
+      newStartTasks.map((value: string) => {
+        return [value, { name: startColumn[value].name, owner: startColumn[value].owner }];
+      }),
+    );
+
+    console.log('startColumn', startColumn);
+
+    const newEndColumn = Object.fromEntries(
+      newEndTasks.map((value: string) => {
+        if (endColumn[value]) {
+          return [value, { name: endColumn[value].name, owner: endColumn[value].owner }];
+        }
+        return [value, { name: startColumn[value].name, owner: startColumn[value].owner }];
+      }),
+    );
+    reOrderTasks(projectKeyRef, source.droppableId, destination.droppableId, newStartColumn, newEndColumn);
+    /*
+        const tasksArray = Object.keys(column).map((value: string) => {
+      return { id: value, name: column[value].name, owner: column[value].owner };
+    });
+    const newTasksArray = Object.keys(column) */
+
+    /*  tasksArray.splice(destination.index, 0, tasksArray.filter(task => task.id === draggableId)); */
   };
 
   useEffect(() => {
@@ -87,19 +153,20 @@ const Main = () => {
                 <Grid item xs={12}>
                   <Typography variant='h3'>{selectedProject.name}</Typography>
                 </Grid>
-                {selectedProject &&
-                  ['new', 'doing', 'done'].map((cardName: string, index: number) => {
-                    return (
-                      <DragDropContext onDragEnd={HandleDragEnd}>
+                {selectedProject && (
+                  <DragDropContext onDragEnd={HandleDragEnd}>
+                    {['new', 'doing', 'done'].map((cardName: string, index: number) => {
+                      return (
                         <Cards
-                          key={index}
+                          key={cardName}
                           selectedProject={selectedProject}
                           cardName={cardName}
                           projectKey={projectKeyRef}
                         />
-                      </DragDropContext>
-                    );
-                  })}
+                      );
+                    })}
+                  </DragDropContext>
+                )}
               </>
             )}
             <Grid item xs={12}>

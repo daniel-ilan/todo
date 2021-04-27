@@ -68,3 +68,13 @@ export const deleteTask = (projectKey: string, card: string, taskId: string) => 
     const projectTodoRef = database.ref(`projects/${projectKey}/todos/${card}/${taskId}`);
     projectTodoRef.remove()
 }
+
+export const reOrderTasks = (projectKey: string, startBoard: string, endBoard: string, startColumn: any, endColumn: any) => {
+    const updates = {
+        ['projects/' + projectKey + '/todos/' + startBoard]: startColumn,
+        ['projects/' + projectKey + '/todos/' + endBoard]: endColumn,
+    }
+
+    console.log(updates);
+    database.ref().update(updates)
+}
