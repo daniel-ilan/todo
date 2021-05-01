@@ -1,13 +1,11 @@
 import Task from './Task';
 import { makeStyles } from '@material-ui/core/styles';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { CardHeader, Card, CardContent, Grid, List, Button } from '@material-ui/core';
 import { AddCircleOutlineRounded } from '@material-ui/icons';
-import { addTask, initTasksOrder } from 'main/fireBaseMethods';
+import { addTask } from 'main/fireBaseMethods';
 import Dialog from './Dialog';
 import { Droppable } from 'react-beautiful-dnd';
-import useKanban from 'utils/kanban';
-import { auth } from 'firebaseConfig';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -44,19 +42,19 @@ interface IaddTask {
   name: string;
 }
 
-interface Itask {
+/* interface Itask {
   id: string;
   name: string;
   owner: string;
   [key: string]: any;
-}
+} */
 
 export default function Cards({ ...props }) {
   const classes = useStyles();
 
   const { cardName, projectKey, column, tasks, allData } = props;
 
-  const [openDialog, setOpenDialog] = React.useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
   const handleClickOpen = () => {
     setOpenDialog(true);
   };

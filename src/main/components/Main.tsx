@@ -1,32 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Button, Container, Grid, makeStyles, Theme, Typography } from '@material-ui/core';
-import { addNewProject, getSelectProjectRef, reorderTasks, reorderTasksColumns } from '../fireBaseMethods';
+import { addNewProject, reorderTasks, reorderTasksColumns } from '../fireBaseMethods';
 import Header from './Header';
 import Dialog from './Dialog';
 import Cards from './Cards';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import useKanban from '../../utils/kanban';
 import { auth } from 'firebaseConfig';
-import { initial } from 'lodash';
 
-interface taskType {
+/* interface taskType {
   name: string;
   owner: string;
   id: string;
   [key: string]: any;
-}
+} */
 
-interface todoType {
+/* interface todoType {
   status: taskType;
   [key: string]: any;
-}
+} */
 
-interface Iproject {
+/* interface Iproject {
   name: string;
   users: string[];
   todos: todoType;
   [key: string]: any;
-}
+} */
 
 const useStyles = makeStyles((theme: Theme) => ({
   wrapper: {
