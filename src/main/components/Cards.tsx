@@ -1,11 +1,13 @@
 import Task from './Task';
 import { makeStyles } from '@material-ui/core/styles';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { CardHeader, Card, CardContent, Grid, List, Button } from '@material-ui/core';
 import { AddCircleOutlineRounded } from '@material-ui/icons';
-import { addTask } from 'main/fireBaseMethods';
+import { addTask, initTasksOrder } from 'main/fireBaseMethods';
 import Dialog from './Dialog';
 import { Droppable } from 'react-beautiful-dnd';
+import useKanban from 'utils/kanban';
+import { auth } from 'firebaseConfig';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -36,60 +38,57 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-interface Ititles {
-  new: string;
-  doing: string;
-  done: string;
-  [key: string]: string;
-}
-
 interface IaddTask {
   projectKey: string;
-  board: string;
+  column: string;
   name: string;
+}
+
+interface Itask {
+  id: string;
+  name: string;
+  owner: string;
+  [key: string]: any;
 }
 
 export default function Cards({ ...props }) {
   const classes = useStyles();
-  const { selectedProject, cardName, projectKey } = props;
-  const titles: Ititles = {
-    new: 'חדש',
-    doing: 'בעשייה',
-    done: 'נעשה',
-  };
+
+  const { cardName, projectKey, column, tasks, allData } = props;
 
   const [openDialog, setOpenDialog] = React.useState(false);
   const handleClickOpen = () => {
     setOpenDialog(true);
   };
-  const todos = selectedProject.todos[cardName];
 
   const onAddNewTask = (name: string) => {
     const newTask: IaddTask = {
       projectKey,
-      board: cardName,
+      column: column.id,
       name,
     };
     addTask(newTask);
   };
+
   return (
     <Grid item xs={12} md={4}>
       <Card className={classes.card}>
-        <CardHeader title={titles[cardName]} />
+        <CardHeader title={cardName} />
         <CardContent className={classes.cardContent}>
-          <Droppable droppableId={cardName}>
+          <Droppable droppableId={column.id}>
             {(provided) => (
               <List className={classes.list} dir='rtl' {...provided.droppableProps} innerRef={provided.innerRef}>
-                {cardName in selectedProject.todos &&
-                  Object.keys(todos).map((key: string, index: number) => {
+                {tasks &&
+                  tasks.map((taskId: string, index: number) => {
                     return (
                       <Task
-                        taskId={key}
+                        taskId={taskId}
                         projectKey={projectKey}
-                        cardName={cardName}
-                        task={todos[key]}
+                        columnDetails={column}
+                        task={allData.tasks[taskId]}
                         index={index}
-                        key={index}></Task>
+                        key={taskId}
+                      />
                     );
                   })}
                 {provided.placeholder}

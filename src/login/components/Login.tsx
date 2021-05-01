@@ -54,7 +54,6 @@ const Login = (props: any) => {
   };
 
   /*   const componentDidUpdate = () => {
-    console.log('stop here');
     if (this.props.isAuthenticated.isLoaded && !this.props.isAuthenticated.isEmpty) {
       let path = `app`;
       this.props.history.push(path);

@@ -5,9 +5,19 @@ export interface initUserType {
 }
 
 export interface projectDataType {
-    todos?: boardType,
+    columns: columnMeta,
     users: string,
-    name: string
+    name: string,
+}
+
+interface Icolumn {
+    id: string;
+    title: string;
+    taskIds: string[];
+}
+
+interface columnMeta {
+    [key: string]: Icolumn | string[];
 }
 
 export interface boardType {

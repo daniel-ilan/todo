@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Container, Grid, makeStyles, Theme, Typography } from '@material-ui/core';
-import { addNewProject, getSelectProjectRef, reOrderTasks } from '../fireBaseMethods';
+import { addNewProject, getSelectProjectRef, reorderTasks, reorderTasksColumns } from '../fireBaseMethods';
 import Header from './Header';
 import Dialog from './Dialog';
 import Cards from './Cards';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
+import useKanban from '../../utils/kanban';
+import { auth } from 'firebaseConfig';
+import { initial } from 'lodash';
 
 interface taskType {
   name: string;
@@ -59,87 +62,81 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 const Main = () => {
   const classes = useStyles();
-  const [selectedProject, setSelectedProject] = useState<Iproject | null>(null);
+  const userId = auth.currentUser!.uid;
   const [projectKeyRef, setProjectKeyRef] = useState('');
+  const [openDialog, setOpenDialog] = React.useState(false);
+  const { initialData, setInitialData, boardName } = useKanban(userId, projectKeyRef);
+
   const onSelectProject = (projectKey: string) => {
     setProjectKeyRef(projectKey);
-    const projectRef = getSelectProjectRef(projectKey);
-    projectRef.on('value', (snapshot: any) => {
-      setSelectedProject(snapshot.val());
-    });
   };
 
-  const [openDialog, setOpenDialog] = React.useState(false);
+  const onAddNewProject = async (projectName: string) => {
+    const projectKey = await addNewProject(projectName);
+    if (projectKey) onSelectProject(projectKey);
+  };
+
   const handleClickOpen = () => {
     setOpenDialog(true);
   };
 
   const HandleDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
+    console.log('handleDragEnd');
+
     if (!destination) return;
-    if (destination.droppableId === source.droppableId && destination.index === source.index) {
+
+    const startColumn = initialData.columns[source.droppableId];
+    const endColumn = initialData.columns[destination.droppableId];
+
+    if (startColumn === endColumn) {
+      const newTaskIds = Array.from(endColumn.taskIds);
+
+      newTaskIds.splice(source.index, 1);
+      newTaskIds.splice(destination.index, 0, draggableId);
+
+      const newColumn = {
+        ...endColumn,
+        taskIds: newTaskIds,
+      };
+
+      const newState = {
+        ...initialData,
+        columns: { ...initialData.columns, [endColumn.id]: newColumn },
+      };
+
+      setInitialData(newState);
+      reorderTasks(projectKeyRef, startColumn.id, newTaskIds);
       return;
     }
-    const startColumn = selectedProject!.todos[source.droppableId];
-    const endColumn = selectedProject!.todos[destination.droppableId]
-      ? selectedProject!.todos[destination.droppableId]
-      : {};
-    console.log('startColumn', startColumn);
-    console.log('endColumn', endColumn);
-    if (endColumn === startColumn) {
-      console.log('reorder same column!');
-      /* const tasksArray = Object.keys(startColumn);
-      tasksArray.splice(source.index, 1);
-    tasksArray.splice(destination.index, 0, draggableId);
+    const startTaskIDs = Array.from(startColumn.taskIds);
+    startTaskIDs.splice(source.index, 1);
+    const newStart = {
+      ...startColumn,
+      taskIds: startTaskIDs,
+    };
 
-    const newColumn = Object.fromEntries(
-      tasksArray.map((value: string) => {
-        return [value, { name: startColumn[value].name, owner: startColumn[value].owner }];
-      }),
-    );
-    reOrderTasks(projectKeyRef, source.droppableId, newColumn); */
-      return;
-    }
+    let finishTaskIDs: string[] = [];
+    if (endColumn.taskIds) finishTaskIDs = Array.from(endColumn.taskIds);
 
-    const newStartTasks = Object.keys(startColumn);
-    newStartTasks.splice(source.index, 1);
-    console.log('newStartTasks', newStartTasks);
+    finishTaskIDs.splice(destination.index, 0, draggableId);
+    const newFinish = {
+      ...endColumn,
+      taskIds: finishTaskIDs,
+    };
 
-    const newEndTasks = Object.keys(endColumn);
-    newEndTasks.splice(source.index, 0, draggableId);
-    console.log('newEndTasks', newEndTasks);
+    const newState = {
+      ...initialData,
+      columns: {
+        ...initialData.columns,
+        [startColumn.id]: newStart,
+        [endColumn.id]: newFinish,
+      },
+    };
 
-    const newStartColumn = Object.fromEntries(
-      newStartTasks.map((value: string) => {
-        return [value, { name: startColumn[value].name, owner: startColumn[value].owner }];
-      }),
-    );
-
-    console.log('startColumn', startColumn);
-
-    const newEndColumn = Object.fromEntries(
-      newEndTasks.map((value: string) => {
-        if (endColumn[value]) {
-          return [value, { name: endColumn[value].name, owner: endColumn[value].owner }];
-        }
-        return [value, { name: startColumn[value].name, owner: startColumn[value].owner }];
-      }),
-    );
-    reOrderTasks(projectKeyRef, source.droppableId, destination.droppableId, newStartColumn, newEndColumn);
-    /*
-        const tasksArray = Object.keys(column).map((value: string) => {
-      return { id: value, name: column[value].name, owner: column[value].owner };
-    });
-    const newTasksArray = Object.keys(column) */
-
-    /*  tasksArray.splice(destination.index, 0, tasksArray.filter(task => task.id === draggableId)); */
+    setInitialData(newState);
+    reorderTasksColumns(projectKeyRef, newStart.id, newFinish.id, startTaskIDs, finishTaskIDs);
   };
-
-  useEffect(() => {
-    if (!selectedProject) setSelectedProject(null);
-    setSelectedProject(selectedProject);
-    console.log('selectedProject', selectedProject);
-  }, [selectedProject]);
 
   return (
     <div className={classes.wrapper}>
@@ -148,25 +145,29 @@ const Main = () => {
         <div className={classes.toolbar}></div>
         <Container>
           <Grid container spacing={4}>
-            {selectedProject && (
+            {initialData && (
               <>
                 <Grid item xs={12}>
-                  <Typography variant='h3'>{selectedProject.name}</Typography>
+                  <Typography variant='h3'>{boardName}</Typography>
                 </Grid>
-                {selectedProject && (
-                  <DragDropContext onDragEnd={HandleDragEnd}>
-                    {['new', 'doing', 'done'].map((cardName: string, index: number) => {
-                      return (
-                        <Cards
-                          key={cardName}
-                          selectedProject={selectedProject}
-                          cardName={cardName}
-                          projectKey={projectKeyRef}
-                        />
-                      );
-                    })}
-                  </DragDropContext>
-                )}
+                <DragDropContext onDragEnd={HandleDragEnd}>
+                  {initialData.columnOrder.map((colId: string, index: number) => {
+                    const column = initialData?.columns[colId];
+                    const tasks = column.taskIds?.map((t: any) => t);
+                    return (
+                      <Cards
+                        column={column}
+                        tasks={tasks}
+                        allData={initialData}
+                        key={column.id}
+                        userId={userId}
+                        index={index}
+                        cardName={column.title}
+                        projectKey={projectKeyRef}
+                      />
+                    );
+                  })}
+                </DragDropContext>
               </>
             )}
             <Grid item xs={12}>
@@ -174,8 +175,7 @@ const Main = () => {
                 פרויקט חדש
               </Button>
               <Dialog
-                cbFunc={addNewProject}
-                onSelectProject={onSelectProject}
+                cbFunc={onAddNewProject}
                 open={openDialog}
                 setOpen={setOpenDialog}
                 text={{ label: 'שם פרויקט:' }}
