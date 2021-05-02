@@ -90,6 +90,21 @@ export const getSelectProjectRef = (projectKey: string) => {
     return projectsRef;
 }
 
+export const changeColumnName = (projectKey: string, columnId: string, newName: string) => {
+    database.ref(`projects/${projectKey}/columns/${columnId}/title`).set(
+        newName
+    );
+}
+
+export const changeProjectName = (projectKey: string, newName: string, userId: string) => {
+    database.ref(`projects/${projectKey}/name`).set(
+        newName
+    );
+    database.ref(`users/${userId}/projects/${projectKey}`).set(
+        newName
+    );
+}
+
 export const deleteTask = (projectKey: string, columnId: string, taskId: string, newTaskIds: string[]) => {
 
     const tasksTodoRef = database.ref(`projects/${projectKey}/tasks/${taskId}`);

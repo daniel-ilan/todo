@@ -1,31 +1,13 @@
 import React, { useState } from 'react';
 import { Button, Container, Grid, makeStyles, Theme, Typography } from '@material-ui/core';
-import { addNewProject, reorderTasks, reorderTasksColumns } from '../fireBaseMethods';
+import { addNewProject, changeProjectName, reorderTasks, reorderTasksColumns } from '../fireBaseMethods';
 import Header from './Header';
 import Dialog from './Dialog';
 import Cards from './Cards';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import useKanban from '../../utils/kanban';
 import { auth } from 'firebaseConfig';
-
-/* interface taskType {
-  name: string;
-  owner: string;
-  id: string;
-  [key: string]: any;
-} */
-
-/* interface todoType {
-  status: taskType;
-  [key: string]: any;
-} */
-
-/* interface Iproject {
-  name: string;
-  users: string[];
-  todos: todoType;
-  [key: string]: any;
-} */
+import EditInline from 'shared/components';
 
 const useStyles = makeStyles((theme: Theme) => ({
   wrapper: {
@@ -54,8 +36,15 @@ const useStyles = makeStyles((theme: Theme) => ({
     alignItems: 'center',
     justifyContent: 'flex-end',
     padding: theme.spacing(0, 1),
-    // necessary for content to be below app bar
     ...theme.mixins.toolbar,
+  },
+  projectName: {
+    display: 'inline-block',
+    transition: '0.3s',
+    padding: theme.spacing(0, 2),
+    '&:hover': {
+      backgroundColor: theme.palette.grey[50],
+    },
   },
 }));
 
@@ -65,6 +54,7 @@ const Main = () => {
   const [projectKeyRef, setProjectKeyRef] = useState('');
   const [openDialog, setOpenDialog] = React.useState(false);
   const { initialData, setInitialData, boardName } = useKanban(userId, projectKeyRef);
+  const [isEditing, setIsediting] = useState(false);
 
   const onSelectProject = (projectKey: string) => {
     setProjectKeyRef(projectKey);
@@ -137,6 +127,17 @@ const Main = () => {
     reorderTasksColumns(projectKeyRef, newStart.id, newFinish.id, startTaskIDs, finishTaskIDs);
   };
 
+  const submitProjectNameChange = (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    event.preventDefault();
+    const newName = event.target.value;
+    changeProjectName(projectKeyRef, newName, userId);
+    setIsediting(false);
+  };
+
+  const enableEditName = () => {
+    setIsediting(true);
+  };
+
   return (
     <div className={classes.wrapper}>
       <Header onSelectProject={onSelectProject} />
@@ -147,7 +148,13 @@ const Main = () => {
             {initialData && (
               <>
                 <Grid item xs={12}>
-                  <Typography variant='h3'>{boardName}</Typography>
+                  {!isEditing ? (
+                    <Typography onClick={() => enableEditName()} variant='h3' className={classes.projectName}>
+                      {boardName}
+                    </Typography>
+                  ) : (
+                    <EditInline value={boardName} cbFunc={submitProjectNameChange} />
+                  )}
                 </Grid>
                 <DragDropContext onDragEnd={HandleDragEnd}>
                   {initialData.columnOrder.map((colId: string, index: number) => {

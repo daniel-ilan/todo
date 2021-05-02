@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { ListItemIcon } from '@material-ui/core';
@@ -7,14 +6,8 @@ import { DeleteForever } from '@material-ui/icons';
 import AlertDialog from './AlertDialog';
 import { deleteTask } from 'main/fireBaseMethods';
 import { Draggable } from 'react-beautiful-dnd';
-const useStyles = makeStyles((theme) => ({
-  listItem: {
-    textAlign: 'right',
-  },
-}));
 
 export default function Task({ ...props }) {
-  const classes = useStyles();
   const [open, setOpen] = useState(false);
   const { projectKey, columnDetails, task, taskId, index } = props;
   const alertText = 'למחוק את המשימה סופית? לא יהיה ניתן לשחזר את המשימה לאחר פעולה זאת';
@@ -34,7 +27,6 @@ export default function Task({ ...props }) {
             <ListItem
               role={undefined}
               button
-              className={classes.listItem}
               {...provided.draggableProps}
               {...provided.dragHandleProps}
               innerRef={provided.innerRef}>

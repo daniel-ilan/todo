@@ -1,11 +1,13 @@
 import Task from './Task';
 import { makeStyles } from '@material-ui/core/styles';
 import React, { useState } from 'react';
-import { CardHeader, Card, CardContent, Grid, List, Button } from '@material-ui/core';
+import { CardHeader, Card, CardContent, Grid, List, Button, IconButton } from '@material-ui/core';
 import { AddCircleOutlineRounded } from '@material-ui/icons';
-import { addTask } from 'main/fireBaseMethods';
+import { addTask, changeColumnName } from 'main/fireBaseMethods';
 import Dialog from './Dialog';
 import { Droppable } from 'react-beautiful-dnd';
+import Edit from '@material-ui/icons/Edit';
+import EditInline from 'shared/components';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -34,6 +36,22 @@ const useStyles = makeStyles((theme) => ({
     marginInlineEnd: theme.spacing(1),
     marginRight: theme.spacing(-1),
   },
+  cardTitleIcon: {
+    opacity: '0',
+    transition: '0.3s',
+  },
+  cardTitle: {
+    display: 'inline-block',
+    borderRadius: 5,
+    padding: theme.spacing(0, 2),
+    transition: '0.3s',
+    '&:hover': {
+      backgroundColor: theme.palette.grey[50],
+      '& $cardTitleIcon': {
+        opacity: '1',
+      },
+    },
+  },
 }));
 
 interface IaddTask {
@@ -52,9 +70,11 @@ interface IaddTask {
 export default function Cards({ ...props }) {
   const classes = useStyles();
 
-  const { cardName, projectKey, column, tasks, allData } = props;
+  const { projectKey, column, tasks, allData } = props;
 
   const [openDialog, setOpenDialog] = useState(false);
+  const [isEditing, setIsediting] = useState(false);
+
   const handleClickOpen = () => {
     setOpenDialog(true);
   };
@@ -68,26 +88,54 @@ export default function Cards({ ...props }) {
     addTask(newTask);
   };
 
+  const enableEditName = () => {
+    setIsediting(true);
+  };
+
+  const submitColumnNameChange = (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    event.preventDefault();
+    const newName = event.target.value;
+    changeColumnName(projectKey, column.id, newName);
+    setIsediting(false);
+  };
+
   return (
     <Grid item xs={12} md={4}>
       <Card className={classes.card}>
-        <CardHeader title={cardName} />
+        <CardHeader
+          onClick={() => enableEditName()}
+          title={
+            !isEditing ? (
+              <div className={classes.cardTitle}>
+                {column.title}
+                <IconButton className={classes.cardTitleIcon}>
+                  <Edit />
+                </IconButton>
+              </div>
+            ) : (
+              <EditInline value={column.title} cbFunc={submitColumnNameChange} />
+            )
+          }
+        />
+
         <CardContent className={classes.cardContent}>
           <Droppable droppableId={column.id}>
             {(provided) => (
               <List className={classes.list} dir='rtl' {...provided.droppableProps} innerRef={provided.innerRef}>
                 {tasks &&
-                  tasks.map((taskId: string, index: number) => {
-                    return (
-                      <Task
-                        taskId={taskId}
-                        projectKey={projectKey}
-                        columnDetails={column}
-                        task={allData.tasks[taskId]}
-                        index={index}
-                        key={taskId}
-                      />
-                    );
+                  tasks.forEach((taskId: string, index: number) => {
+                    if (allData.tasks[taskId]) {
+                      return (
+                        <Task
+                          taskId={taskId}
+                          projectKey={projectKey}
+                          columnDetails={column}
+                          task={allData.tasks[taskId]}
+                          index={index}
+                          key={taskId}
+                        />
+                      );
+                    }
                   })}
                 {provided.placeholder}
               </List>

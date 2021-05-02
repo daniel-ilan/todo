@@ -6,7 +6,6 @@ const useKanban = (userId: string, projectId: string) => {
   const [columns, setColumns]: any = useState(null);
   const [final, setFinal] = useState<null | any>(null);
   const [boardName, setBoardName] = useState('');
-  console.log('enter kanban');
 
   useEffect(() => {
     if (!projectId) {
@@ -27,10 +26,7 @@ const useKanban = (userId: string, projectId: string) => {
       return;
     }
 
-    database
-      .ref(`projects/${projectId}`)
-      .get()
-      .then((snapshot) => setBoardName(snapshot.val().name));
+    database.ref(`projects/${projectId}`).on('value', (snapshot) => setBoardName(snapshot.val().name));
   }, [userId, projectId]);
 
   useEffect(() => {
