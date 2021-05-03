@@ -60,13 +60,6 @@ interface IaddTask {
   name: string;
 }
 
-/* interface Itask {
-  id: string;
-  name: string;
-  owner: string;
-  [key: string]: any;
-} */
-
 export default function Cards({ ...props }) {
   const classes = useStyles();
 
@@ -123,19 +116,17 @@ export default function Cards({ ...props }) {
             {(provided) => (
               <List className={classes.list} dir='rtl' {...provided.droppableProps} innerRef={provided.innerRef}>
                 {tasks &&
-                  tasks.forEach((taskId: string, index: number) => {
-                    if (allData.tasks[taskId]) {
-                      return (
-                        <Task
-                          taskId={taskId}
-                          projectKey={projectKey}
-                          columnDetails={column}
-                          task={allData.tasks[taskId]}
-                          index={index}
-                          key={taskId}
-                        />
-                      );
-                    }
+                  tasks.map((taskId: string, index: number) => {
+                    return (
+                      <Task
+                        taskId={taskId}
+                        projectKey={projectKey}
+                        columnDetails={column}
+                        task={allData.tasks[taskId]}
+                        index={index}
+                        key={taskId}
+                      />
+                    );
                   })}
                 {provided.placeholder}
               </List>

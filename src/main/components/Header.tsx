@@ -70,7 +70,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Header = ({ ...props }) => {
-  const { onSelectProject } = props;
+  const { onSelectProject, projects } = props;
   const signout = useAuth()!.signout;
   const [userName, setUserName] = useState('');
   const [isDrawerOpen, SetIsDrawerOpen] = useState(false);
@@ -127,7 +127,12 @@ const Header = ({ ...props }) => {
           </Button>
         </Toolbar>
       </AppBar>
-      <DrawerPane isDrawerOpen={isDrawerOpen} handleDrawerClose={handleDrawerClose} onSelectProject={onSelectProject} />
+      <DrawerPane
+        projects={projects}
+        isDrawerOpen={isDrawerOpen}
+        handleDrawerClose={handleDrawerClose}
+        onSelectProject={onSelectProject}
+      />
     </>
   );
 };

@@ -60,13 +60,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const DrawerPane = ({ ...props }) => {
-  const { isDrawerOpen, handleDrawerClose, onSelectProject } = props;
+  const { isDrawerOpen, handleDrawerClose, onSelectProject, projects } = props;
   const [anchorProjectsEl, setAnchorProjectsEl] = React.useState<null | HTMLElement>(null);
   const isProjectsMenuOpen = Boolean(anchorProjectsEl);
   const [anchorUserEl, setAnchorUserEl] = React.useState<null | HTMLElement>(null);
   const isUserMenuOpen = Boolean(anchorUserEl);
-  const [projects, setProjects] = useState<projectListType>({});
-  const projectsRef = getProjectsRef();
   const classes = useStyles();
 
   const [isNameDialogOpen, setNameDialogOpen] = useState(false);
@@ -95,13 +93,6 @@ const DrawerPane = ({ ...props }) => {
   const handleNameChange = (newName: string) => {
     changeUserName(newName);
   };
-
-  useEffect(() => {
-    if (!projects) setProjects({});
-    projectsRef.on('value', (snapshot: any) => {
-      if (!isEqual(projects, snapshot.val().projects) && snapshot.val().projects) setProjects(snapshot.val().projects);
-    });
-  }, [projectsRef, projects]);
 
   return (
     <Drawer

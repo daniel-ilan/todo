@@ -18,6 +18,7 @@ export default function Task({ ...props }) {
   const handleClickOpen = () => {
     setOpen(true);
   };
+  console.log('this is task!');
 
   return (
     <>

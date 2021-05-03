@@ -117,7 +117,6 @@ export const reorderTasksColumns = (projectKey: string, startColumnName: string,
         [`projects/${projectKey}/columns/${startColumnName}/taskIds`]: startColumn,
         [`projects/${projectKey}/columns/${endColumnName}/taskIds`]: endColumn,
     }
-    console.log("changeded columns");
 
     database.ref().update(updates)
 }
@@ -125,21 +124,6 @@ export const reorderTasksColumns = (projectKey: string, startColumnName: string,
 export const reorderTasks = (projectKey: string, columnName: string, tasks: any) => {
 
     database.ref(`projects/ ${projectKey}/columns/${columnName}/taskIds`).update(tasks)
-}
-
-export const initTasksOrder = (projectKey: string, column: string, tasks: any): Itask[] => {
-    console.log("tasks", tasks);
-    const sortedTodos = Object.keys(tasks)
-        .sort((a, b) => {
-            return tasks[a].order - tasks[b].order;
-        })
-        .map((taskId: string) => {
-            return { [taskId]: tasks[taskId] };
-        });
-    console.log("sortedTodos", sortedTodos);
-
-    database.ref('projects/' + projectKey + '/todos').child(column).update(tasks)
-    return sortedTodos as Itask[];
 }
 
 export const changeUserName = async (newName: string) => {
