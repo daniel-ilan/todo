@@ -7,7 +7,6 @@ type value = {
   signup: (email: string, password: string, fullName: string) => Promise<unknown>;
   signin: (email: string, password: string) => Promise<unknown>;
   signout: () => Promise<void>;
-  passwordReset: (email: string) => Promise<unknown>;
 };
 
 const AuthContext = createContext<null | value>(null);
@@ -50,19 +49,7 @@ const UserProvider: React.FC = ({ children }) => {
   const signout = () => {
     return auth.signOut();
   };
-  const passwordReset = (email: string) => {
-    let promise = new Promise(function (resolve, reject) {
-      auth
-        .sendPasswordResetEmail(email)
-        .then(() => {
-          resolve(`Password Reset Email sent to ${email}`);
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
-    return promise;
-  };
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setCurrentUser(user);
@@ -70,12 +57,12 @@ const UserProvider: React.FC = ({ children }) => {
     });
     return unsubscribe;
   }, [currentUser]);
+
   const value = {
     currentUser,
     signup,
     signin,
     signout,
-    passwordReset,
   };
 
   return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;

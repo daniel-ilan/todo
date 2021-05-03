@@ -3,10 +3,12 @@ import { Divider, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import MailIcon from '@material-ui/icons/Mail';
+import PersonIcon from '@material-ui/icons/Person';
 import { Menu, MenuItem } from '@material-ui/core';
 import clsx from 'clsx';
 import isEqual from 'lodash/isEqual';
-import { getProjectsRef } from '../fireBaseMethods';
+import { getProjectsRef, changeUserName } from '../fireBaseMethods';
+import FormDialog from './Dialog';
 
 type projectType = {
   projectKey?(index: string): string;
@@ -50,17 +52,24 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     justifyContent: 'flex-end',
     padding: theme.spacing(0, 1),
-    // necessary for content to be below app bar
     ...theme.mixins.toolbar,
+  },
+  lowerDevider: {
+    marginTop: 'auto',
   },
 }));
 
 const DrawerPane = ({ ...props }) => {
   const { isDrawerOpen, handleDrawerClose, onSelectProject } = props;
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const isMenuOpen = Boolean(anchorEl);
+  const [anchorProjectsEl, setAnchorProjectsEl] = React.useState<null | HTMLElement>(null);
+  const isProjectsMenuOpen = Boolean(anchorProjectsEl);
+  const [anchorUserEl, setAnchorUserEl] = React.useState<null | HTMLElement>(null);
+  const isUserMenuOpen = Boolean(anchorUserEl);
   const [projects, setProjects] = useState<projectListType>({});
   const projectsRef = getProjectsRef();
+  const classes = useStyles();
+
+  const [isNameDialogOpen, setNameDialogOpen] = useState(false);
 
   const handleLoadProject = (key: string) => {
     onSelectProject(key);
@@ -68,11 +77,23 @@ const DrawerPane = ({ ...props }) => {
   };
 
   const handleCloseMenu = () => {
-    setAnchorEl(null);
+    setAnchorProjectsEl(null);
+  };
+
+  const handleCloseUserMenu = () => {
+    setAnchorUserEl(null);
   };
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
+    setAnchorProjectsEl(event.currentTarget);
+  };
+
+  const openUserOptions = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorUserEl(event.currentTarget);
+  };
+
+  const handleNameChange = (newName: string) => {
+    changeUserName(newName);
   };
 
   useEffect(() => {
@@ -81,8 +102,6 @@ const DrawerPane = ({ ...props }) => {
       if (!isEqual(projects, snapshot.val().projects) && snapshot.val().projects) setProjects(snapshot.val().projects);
     });
   }, [projectsRef, projects]);
-
-  const classes = useStyles();
 
   return (
     <Drawer
@@ -108,26 +127,67 @@ const DrawerPane = ({ ...props }) => {
             <ListItemText primary={text} primaryTypographyProps={{ align: 'right' }} />
           </ListItem>
         ))}
+        <Menu
+          id='long-menu'
+          anchorEl={anchorProjectsEl}
+          keepMounted
+          open={isProjectsMenuOpen}
+          onClose={handleCloseMenu}
+          getContentAnchorEl={null}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+          PaperProps={{
+            style: {
+              maxHeight: 48 * 4.5,
+              width: '30ch',
+            },
+          }}>
+          {Object.values(projects).length > 0 &&
+            Object.keys(projects).map((key: string, index: number) => (
+              <MenuItem key={index} onClick={() => handleLoadProject(key)}>
+                {projects[key]}
+              </MenuItem>
+            ))}
+        </Menu>
       </List>
-      <Menu
-        id='long-menu'
-        anchorEl={anchorEl}
-        keepMounted
-        open={isMenuOpen}
-        onClose={handleCloseMenu}
-        PaperProps={{
-          style: {
-            maxHeight: 48 * 4.5,
-            width: '30ch',
-          },
-        }}>
-        {Object.values(projects).length > 0 &&
-          Object.keys(projects).map((key: string, index: number) => (
-            <MenuItem key={index} onClick={() => handleLoadProject(key)}>
-              {projects[key]}
-            </MenuItem>
-          ))}
-      </Menu>
+
+      <Divider className={classes.lowerDevider} />
+      <List>
+        <ListItem button onClick={openUserOptions}>
+          <ListItemIcon>
+            <PersonIcon />
+          </ListItemIcon>
+          <ListItemText primary='פרטי משתמש' primaryTypographyProps={{ align: 'right' }} />
+        </ListItem>
+        <Menu
+          id='user-menu'
+          anchorEl={anchorUserEl}
+          keepMounted
+          open={isUserMenuOpen}
+          onClose={handleCloseUserMenu}
+          getContentAnchorEl={null}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          PaperProps={{
+            style: {
+              maxHeight: 48 * 4.5,
+              width: '30ch',
+            },
+          }}>
+          <MenuItem
+            onClick={() => {
+              setNameDialogOpen(true);
+            }}>
+            שינוי שם
+          </MenuItem>
+        </Menu>
+      </List>
+      <FormDialog
+        cbFunc={handleNameChange}
+        open={isNameDialogOpen}
+        setOpen={setNameDialogOpen}
+        text={{ label: 'שם חדש:' }}
+      />
     </Drawer>
   );
 };

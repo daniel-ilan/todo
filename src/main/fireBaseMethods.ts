@@ -141,3 +141,18 @@ export const initTasksOrder = (projectKey: string, column: string, tasks: any): 
     database.ref('projects/' + projectKey + '/todos').child(column).update(tasks)
     return sortedTodos as Itask[];
 }
+
+export const changeUserName = async (newName: string) => {
+    const user = auth.currentUser!;
+    const userId = auth.currentUser?.uid;
+    await user.updateProfile({
+        displayName: newName,
+    });
+    database.ref(`users/${userId}/displayName`).set(newName)
+
+};
+
+export const getUserNameRef = (uid: string) => {
+    const userRef = database.ref(`users/${uid}/displayName`)
+    return userRef
+}

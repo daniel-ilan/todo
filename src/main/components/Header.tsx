@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useHistory } from 'react-router-dom';
 import { useAuth } from 'shared/providers/firebaseAuthProvider';
 import { makeStyles, Typography, Toolbar, IconButton, AppBar, Button, Box } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
 import DrawerPane from './DrawerPane';
+import { getUserNameRef } from '../fireBaseMethods';
 
 const useStyles = makeStyles((theme) => ({
   icon: {
@@ -71,6 +72,7 @@ const useStyles = makeStyles((theme) => ({
 const Header = ({ ...props }) => {
   const { onSelectProject } = props;
   const signout = useAuth()!.signout;
+  const [userName, setUserName] = useState('');
   const [isDrawerOpen, SetIsDrawerOpen] = useState(false);
   const history = useHistory();
   const classes = useStyles();
@@ -81,12 +83,22 @@ const Header = ({ ...props }) => {
   const handleDrawerClose = () => {
     SetIsDrawerOpen(false);
   };
-  //test
 
   const handleLogOut = () => {
     history.push('/');
     signout();
   };
+
+  const currentUser = useAuth()?.currentUser;
+  useEffect(() => {
+    if (!userName) setUserName(currentUser.displayName);
+    const userNameRef = getUserNameRef(currentUser.uid);
+    userNameRef.on('value', (snapshot) => {
+      const newUserName = snapshot.val();
+      setUserName(newUserName);
+    });
+  }, [currentUser.displayName, currentUser.uid, userName]);
+
   return (
     <>
       <AppBar
@@ -107,7 +119,7 @@ const Header = ({ ...props }) => {
               <MenuIcon />
             </IconButton>
             <Typography variant='h6' noWrap>
-              משהו אחר
+              {userName}
             </Typography>
           </Box>
           <Button variant='contained' className={classes.logOutBtn} color='primary' onClick={() => handleLogOut()}>
