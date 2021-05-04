@@ -19,10 +19,6 @@ type userDataType = {
   [index: string]: projectType;
 };
 
-type projectDataType = {
-  [index: string]: any;
-};
-
 const useStyles = makeStyles((theme: Theme) => ({
   wrapper: {
     height: '100%',
