@@ -5,7 +5,7 @@ import { useAuth } from 'shared/providers/firebaseAuthProvider';
 import { makeStyles, Typography, Toolbar, IconButton, AppBar, Button, Box } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
 import DrawerPane from './DrawerPane';
-import { getUserNameRef } from '../fireBaseMethods';
+import { getUserNameRef } from '../../main/fireBaseMethods';
 
 const useStyles = makeStyles((theme) => ({
   icon: {

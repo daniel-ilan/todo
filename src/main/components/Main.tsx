@@ -1,29 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Container, Grid, makeStyles, Theme, Typography } from '@material-ui/core';
-import {
-  addNewProject,
-  changeProjectName,
-  getProjectsRef,
-  getUserNameRef,
-  reorderTasks,
-  reorderTasksColumns,
-} from '../fireBaseMethods';
-import Header from './Header';
-import Dialog from './Dialog';
+import { addNewProject, changeProjectName, getUserRef, reorderTasks, reorderTasksColumns } from '../fireBaseMethods';
+import Header from 'header';
+import FormDialog from 'shared/components/dialog';
 import Cards from './Cards';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import useKanban from '../../utils/kanban';
 import { auth } from 'firebaseConfig';
-import EditInline from 'shared/components';
+import EditInline from 'shared/components/editInline';
 import isEqual from 'lodash/isEqual';
 import ProjectDisplay from 'projectDisplay';
 
 type projectType = {
-  projectKey?(index: string): string;
+  [index: string]: string;
 };
 
-type projectListType = {
+type userDataType = {
   [index: string]: projectType;
+};
+
+type projectDataType = {
+  [index: string]: any;
 };
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -75,9 +72,8 @@ const Main = () => {
   const [openDialog, setOpenDialog] = React.useState(false);
   const { initialData, setInitialData, boardName } = useKanban(user.uid, projectKeyRef);
   const [isEditing, setIsediting] = useState(false);
-  const [projects, setProjects] = useState<projectListType>({});
-  const projectsRef = getProjectsRef();
-  const [userName, setUserName] = useState('');
+  const [userData, setUserData] = useState<userDataType>({});
+  const userRef = getUserRef();
 
   const onSelectProject = (projectKey: string) => {
     setProjectKeyRef(projectKey);
@@ -162,88 +158,91 @@ const Main = () => {
   };
 
   useEffect(() => {
-    if (!projects) setProjects({});
-    projectsRef.on('value', (snapshot: any) => {
-      if (!isEqual(projects, snapshot.val().projects) && snapshot.val().projects) setProjects(snapshot.val().projects);
+    if (!userData) setUserData({});
+    userRef.on('value', (snapshot: any) => {
+      if (!isEqual(userData, snapshot.val()) && snapshot.val()) {
+        setUserData(snapshot.val());
+      }
     });
-  }, [projectsRef, projects]);
-
-  useEffect(() => {
-    if (!userName) setUserName(user.displayName!);
-    const userNameRef = getUserNameRef(user.uid);
-    userNameRef.on('value', (snapshot) => {
-      const newUserName = snapshot.val();
-      setUserName(newUserName);
-    });
-  }, [user.displayName, user.uid, userName]);
+  }, [userRef, userData]);
 
   return (
     <div className={classes.wrapper}>
-      <Header onSelectProject={onSelectProject} projects={projects} />
+      <Header onSelectProject={onSelectProject} projects={userData.projects} />
       <main className={classes.main}>
         <div className={classes.toolbar}></div>
-        <Container>
-          <Grid container spacing={4}>
-            {initialData ? (
-              <>
-                <Grid item xs={12}>
-                  {!isEditing ? (
-                    <Typography onClick={() => enableEditName()} variant='h3' className={classes.projectName}>
-                      {boardName}
+
+        {userData && (
+          <Container>
+            <Grid container spacing={4}>
+              {initialData ? (
+                <>
+                  <Grid item xs={12}>
+                    {!isEditing ? (
+                      <Typography onClick={() => enableEditName()} variant='h3' className={classes.projectName}>
+                        {boardName}
+                      </Typography>
+                    ) : (
+                      <EditInline value={boardName} cbFunc={submitProjectNameChange} />
+                    )}
+                  </Grid>
+                  <DragDropContext onDragEnd={HandleDragEnd}>
+                    {initialData.columnOrder.map((colId: string, index: number) => {
+                      const column = initialData?.columns[colId];
+                      const tasks = column.taskIds?.map((t: any) => t);
+                      return (
+                        <Cards
+                          column={column}
+                          tasks={tasks}
+                          allData={initialData}
+                          key={column.id}
+                          index={index}
+                          projectKey={projectKeyRef}
+                        />
+                      );
+                    })}
+                  </DragDropContext>
+                </>
+              ) : (
+                <>
+                  <Grid item xs={12}>
+                    <Typography variant='h1' component='h1' gutterBottom className={classes.userName}>
+                      שלום, {userData.displayName}
                     </Typography>
-                  ) : (
-                    <EditInline value={boardName} cbFunc={submitProjectNameChange} />
-                  )}
-                </Grid>
-                <DragDropContext onDragEnd={HandleDragEnd}>
-                  {initialData.columnOrder.map((colId: string, index: number) => {
-                    const column = initialData?.columns[colId];
-                    const tasks = column.taskIds?.map((t: any) => t);
-                    return (
-                      <Cards
-                        column={column}
-                        tasks={tasks}
-                        allData={initialData}
-                        key={column.id}
-                        index={index}
-                        projectKey={projectKeyRef}
-                      />
-                    );
-                  })}
-                </DragDropContext>
-              </>
-            ) : (
-              <>
-                <Grid item xs={12}>
-                  <Typography variant='h1' component='h1' gutterBottom className={classes.userName}>
-                    שלום, {userName}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography variant='h4' component='h2' gutterBottom className={classes.userName}>
-                    פרויקטים:
-                  </Typography>
-                  <Button variant='contained' color='primary' onClick={handleClickOpen}>
-                    פרויקט חדש
-                  </Button>
-                  <Dialog
-                    cbFunc={onAddNewProject}
-                    open={openDialog}
-                    setOpen={setOpenDialog}
-                    text={{ label: 'שם פרויקט:' }}
-                  />
-                </Grid>
-                {Object.keys(projects).map((projectKey: string, index: number) => {
-                  return (
-                    <Grid item xs={6}>
-                      <ProjectDisplay projectKey={projectKey} name={projects[projectKey]} key={index} />
-                    </Grid>
-                  );
-                })}
-              </>
-            )}
-          </Grid>
-        </Container>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography variant='h4' component='h2' gutterBottom className={classes.userName}>
+                      פרויקטים:
+                    </Typography>
+                    <Button variant='contained' color='primary' onClick={handleClickOpen}>
+                      פרויקט חדש
+                    </Button>
+                    <FormDialog
+                      cbFunc={onAddNewProject}
+                      open={openDialog}
+                      setOpen={setOpenDialog}
+                      text={{ label: 'שם פרויקט:' }}
+                    />
+                  </Grid>
+                  {userData.projects &&
+                    Object.keys(userData.projects).map((projectKey: string, index: number) => {
+                      return (
+                        <Grid item xs={6} key={projectKey}>
+                          <ProjectDisplay
+                            onSelectProject={onSelectProject}
+                            projectKey={projectKey}
+                            name={userData.projects[projectKey]}
+                            key={index}
+                            user={user}
+                          />
+                        </Grid>
+                      );
+                    })}
+                </>
+              )}
+            </Grid>
+          </Container>
+        )}
       </main>
     </div>
   );

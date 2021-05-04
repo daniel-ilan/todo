@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 import { CardHeader, Card, CardContent, Grid, List, Button, IconButton } from '@material-ui/core';
 import { AddCircleOutlineRounded } from '@material-ui/icons';
 import { addTask, changeColumnName } from 'main/fireBaseMethods';
-import Dialog from './Dialog';
+import Dialog from 'shared/components/dialog';
 import { Droppable } from 'react-beautiful-dnd';
 import Edit from '@material-ui/icons/Edit';
-import EditInline from 'shared/components';
+import EditInline from 'shared/components/editInline';
 
 const useStyles = makeStyles((theme) => ({
   card: {

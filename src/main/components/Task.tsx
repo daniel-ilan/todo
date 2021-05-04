@@ -3,7 +3,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { ListItemIcon } from '@material-ui/core';
 import { DeleteForever } from '@material-ui/icons';
-import AlertDialog from './AlertDialog';
+import AlertDialog from 'shared/components/alertDialog/AlertDialog';
 import { deleteTask } from 'main/fireBaseMethods';
 import { Draggable } from 'react-beautiful-dnd';
 
@@ -18,7 +18,6 @@ export default function Task({ ...props }) {
   const handleClickOpen = () => {
     setOpen(true);
   };
-  console.log('this is task!');
 
   return (
     <>

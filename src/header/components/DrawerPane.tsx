@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Divider, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, makeStyles } from '@material-ui/core';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
@@ -6,17 +6,8 @@ import MailIcon from '@material-ui/icons/Mail';
 import PersonIcon from '@material-ui/icons/Person';
 import { Menu, MenuItem } from '@material-ui/core';
 import clsx from 'clsx';
-import isEqual from 'lodash/isEqual';
-import { getProjectsRef, changeUserName } from '../fireBaseMethods';
-import FormDialog from './Dialog';
-
-type projectType = {
-  projectKey?(index: string): string;
-};
-
-type projectListType = {
-  [index: string]: projectType;
-};
+import { changeUserName } from '../../main/fireBaseMethods';
+import FormDialog from 'shared/components/dialog/Dialog';
 
 const useStyles = makeStyles((theme) => ({
   menuButton: {
@@ -133,7 +124,7 @@ const DrawerPane = ({ ...props }) => {
               width: '30ch',
             },
           }}>
-          {Object.values(projects).length > 0 &&
+          {projects &&
             Object.keys(projects).map((key: string, index: number) => (
               <MenuItem key={index} onClick={() => handleLoadProject(key)}>
                 {projects[key]}

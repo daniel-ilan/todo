@@ -7,13 +7,6 @@ interface IaddTask {
     name: string;
 }
 
-interface Itask {
-    name: string;
-    order: number;
-    owner: string;
-    [key: string]: any;
-}
-
 export const initUserData = (userData: Types.initUserType) => {
     const { userId, email, displayName } = userData;
     database.ref('users/' + userId).set({
@@ -74,12 +67,11 @@ export const addTask = async ({ projectKey, column, name }: IaddTask) => {
     }).catch(err => {
         console.log(err);
     })
-    console.log("stop this", getTasks)
     database.ref('projects/' + projectKey + '/columns/' + column).child('taskIds').set(getTasks)
 
 }
 
-export const getProjectsRef = () => {
+export const getUserRef = () => {
     const userId = auth.currentUser!.uid;
     const userProjectsRef = database.ref('users/' + userId);
     return userProjectsRef;
@@ -112,18 +104,20 @@ export const deleteTask = (projectKey: string, columnId: string, taskId: string,
     database.ref(`projects/${projectKey}/columns/${columnId}/taskIds`).set(newTaskIds)
 }
 
-export const reorderTasksColumns = (projectKey: string, startColumnName: string, endColumnName: string, startColumn: any, endColumn: any) => {
-    const updates = {
-        [`projects/${projectKey}/columns/${startColumnName}/taskIds`]: startColumn,
-        [`projects/${projectKey}/columns/${endColumnName}/taskIds`]: endColumn,
-    }
+export const deleteProject = (projectKey: string, userId: string) => {
+    database.ref(`projects/${projectKey}`).remove()
+    database.ref(`users/${userId}/projects/${projectKey}`).remove()
+}
 
-    database.ref().update(updates)
+export const reorderTasksColumns = (projectKey: string, startColumnName: string, endColumnName: string, startColumn: any, endColumn: any) => {
+
+    database.ref(`projects/${projectKey}/columns/${startColumnName}/taskIds`).set(startColumn)
+    database.ref(`projects/${projectKey}/columns/${endColumnName}/taskIds`).set(endColumn)
 }
 
 export const reorderTasks = (projectKey: string, columnName: string, tasks: any) => {
 
-    database.ref(`projects/ ${projectKey}/columns/${columnName}/taskIds`).update(tasks)
+    database.ref(`projects/ ${projectKey}/columns/${columnName}/taskIds`).set(tasks)
 }
 
 export const changeUserName = async (newName: string) => {
