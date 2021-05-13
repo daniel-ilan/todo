@@ -1,4 +1,3 @@
-import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 import Login from 'login';
 import Container from './Container';
@@ -16,7 +15,7 @@ const App = () => {
             <Login />
             <Footer />
           </Route>
-          <PrivateRoute path='/todos' component={Todos} />
+          <PrivateRoute component={Todos} path='/todos' />
         </Switch>
       </Container>
     </UserProvideer>

@@ -2,6 +2,7 @@ import { Button, Card, CardActions, CardContent, Grid, makeStyles, Typography } 
 import { isEqual } from 'lodash';
 import { deleteProject, getSelectProjectRef } from 'main/fireBaseMethods';
 import React, { useEffect, useState } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import AlertDialog from 'shared/components/alertDialog/AlertDialog';
 
 const useStyles = makeStyles((theme) => ({
@@ -30,22 +31,23 @@ const useStyles = makeStyles((theme) => ({
 
 const ProjectDisplay = ({ ...props }) => {
   const classes = useStyles();
-  const { name, projectKey, onSelectProject, user } = props;
+  const { name, projectKey, user } = props;
   const [open, setOpen] = useState(false);
   const alertText = 'למחוק את הפרויקט סופית? לא יהיה ניתן לשחזר אותו לאחר מכן';
   const projectRef = getSelectProjectRef(projectKey);
-  const [projectData, setProjectData] = useState(null);
+  const [projectData, setProjectData] = useState<any>(null);
   const [taskCount, setTaskCount] = useState(0);
 
   useEffect(() => {
     projectRef.on('value', (snapshot) => {
       if (!isEqual(snapshot.val(), projectData)) {
         setProjectData(snapshot.val());
-        setTaskCount(Object.keys(snapshot.val().tasks).length);
+        if (snapshot.val().tasks) {
+          setTaskCount(Object.keys(snapshot.val().tasks).length);
+        }
       }
     });
   }, [projectData, projectRef]);
-  console.log(projectData);
 
   const handleDeleteProject = () => {
     deleteProject(projectKey, user.uid);
@@ -76,7 +78,7 @@ const ProjectDisplay = ({ ...props }) => {
             </Grid>
           </CardContent>
           <CardActions className={classes.cardActions}>
-            <Button size='small' color='primary' variant='outlined' onClick={() => onSelectProject(projectKey)}>
+            <Button size='small' color='primary' variant='outlined' component={RouterLink} to={`todos/${projectKey}`}>
               כניסה לפרויקט
             </Button>
             <Button size='small' className={classes.deleteProject} onClick={() => setOpen(true)}>

@@ -9,12 +9,6 @@ import Paper from '@material-ui/core/Paper';
 import Signup from './Signup';
 import TabPanel from './TabPanel';
 
-/* export interface tabPropsType {
-  cb: (event: any, value: number) => void;
-  index: number;
-  value: number;
-} */
-
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1,
@@ -41,35 +35,12 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 const Login = (props: any) => {
-  /* constructor(props: any) {
-    super(props);
-    this.handleChange = this.handleChange.bind(this);
-    this.state = { value: 0, chosenTab: false };
-  } */
   const classes = useStyles();
   const [chosenTab, setChosenTab] = useState(0);
 
   const handleChange = (event: any, value: number) => {
     setChosenTab(value);
   };
-
-  /*   const componentDidUpdate = () => {
-    if (this.props.isAuthenticated.isLoaded && !this.props.isAuthenticated.isEmpty) {
-      let path = `app`;
-      this.props.history.push(path);
-    }
-  }
-  componentDidMount() {
-    if (this.props.isAuthenticated.isLoaded && !this.props.isAuthenticated.isEmpty) {
-      let path = `app`;
-      this.props.history.push(path);
-    }
-  } */
-  /*  const tabProps: tabPropsType = {
-    index: 0,
-    value: chosenTab,
-    cb: handleChange,
-  }; */
 
   return (
     <Grid container className={classes.root}>

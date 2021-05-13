@@ -13,10 +13,12 @@ const useKanban = (userId: string, projectId: string) => {
     }
     database.ref(`projects/${projectId}/tasks`).on('value', (snapshot) => {
       const documents: any[] = [];
-
-      Object.keys(snapshot.val()).forEach((taskKey: string) => {
-        documents.push({ ...snapshot.val()[taskKey] });
-      });
+      if (snapshot.val()) {
+        Object.keys(snapshot.val()).forEach((taskKey: string) => {
+          documents.push({ ...snapshot.val()[taskKey] });
+        });
+        return setTasks(documents);
+      }
       return setTasks(documents);
     });
   }, [userId, projectId]);
@@ -44,6 +46,8 @@ const useKanban = (userId: string, projectId: string) => {
   }, [userId, projectId]);
 
   useEffect(() => {
+    console.log('initial data');
+
     if (tasks && columns) {
       const finalObject: any = {};
 

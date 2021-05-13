@@ -1,13 +1,16 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth } from '../../firebaseConfig';
+import { auth, googleAuthProvider } from '../../firebaseConfig';
 import { initUserData } from 'main/fireBaseMethods';
 
 type value = {
   currentUser: any | null;
   signup: (email: string, password: string, fullName: string) => Promise<unknown>;
   signin: (email: string, password: string) => Promise<unknown>;
+  signInWithGoogle: () => any;
   signout: () => Promise<void>;
 };
+
+const googleProvider = new googleAuthProvider();
 
 const AuthContext = createContext<null | value>(null);
 export function useAuth() {
@@ -49,6 +52,19 @@ const UserProvider: React.FC = ({ children }) => {
   const signout = () => {
     return auth.signOut();
   };
+  const signInWithGoogle = () => {
+    let promise = new Promise(function (resolve, reject) {
+      auth
+        .signInWithPopup(googleProvider)
+        .then((ref) => {
+          resolve(ref);
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
+    return promise;
+  };
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -62,6 +78,7 @@ const UserProvider: React.FC = ({ children }) => {
     currentUser,
     signup,
     signin,
+    signInWithGoogle,
     signout,
   };
 

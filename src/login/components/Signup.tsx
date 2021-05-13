@@ -59,6 +59,7 @@ const Signup = ({ ...props }) => {
 
   const signup = useAuth()!.signup;
   const history = useHistory();
+  const signInWithGoogle = useAuth()!.signInWithGoogle;
 
   const handleSignup = (event: any, email: string, password: string, displayName: string) => {
     console.log(error);
@@ -77,6 +78,19 @@ const Signup = ({ ...props }) => {
     setEmail('');
     setPassword('');
     setDisplayName('');
+  };
+  const handleSignInWithGoogle = (event: any) => {
+    event.preventDefault();
+    setLoading(true);
+    signInWithGoogle()
+      .then((data: any) => {
+        setLoading(false);
+        history.push('/todos');
+      })
+      .catch((error: any) => {
+        console.log(error);
+        setLoading(false);
+      });
   };
   const onChangeHandler = (event: any) => {
     const { name, value } = event.currentTarget;
@@ -161,17 +175,17 @@ const Signup = ({ ...props }) => {
             }}>
             הרשמה
           </Button>
-          {/* <Button
+          <Button
             type='submit'
             variant='contained'
-            mt={4}
             color='secondary'
             className={classes.submit}
             onClick={(event) => {
-              console.log(event);
+              handleSignInWithGoogle(event);
             }}>
             התחברות עם גוגל
-          </Button> */}
+          </Button>
+
           <Grid container>
             <Typography variant='body2' align='center' className={classes.smallText}>
               כבר נרשמת?

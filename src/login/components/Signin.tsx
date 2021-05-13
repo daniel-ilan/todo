@@ -48,18 +48,16 @@ const Signin = ({ ...props }) => {
   const { handleChange } = props;
   const classes = useStyles();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const signin = useAuth()!.signin;
+  const signInWithGoogle = useAuth()!.signInWithGoogle;
   const history = useHistory();
 
   const handleSignIn = (event: any, email: string, password: string) => {
-    console.log(error);
     event.preventDefault();
-    setError('');
     setLoading(true);
     signin(email, password)
       .then((ref) => {
@@ -67,12 +65,25 @@ const Signin = ({ ...props }) => {
         history.push('/todos');
       })
       .catch((error) => {
-        setError(error.message);
         console.log(error);
         setLoading(false);
       });
     setEmail('');
     setPassword('');
+  };
+
+  const handleSignInWithGoogle = (event: any) => {
+    event.preventDefault();
+    setLoading(true);
+    signInWithGoogle()
+      .then((data: any) => {
+        setLoading(false);
+        history.push('/todos');
+      })
+      .catch((error: any) => {
+        console.log(error);
+        setLoading(false);
+      });
   };
 
   const handleTabChange = (event: any) => {
@@ -140,7 +151,7 @@ const Signin = ({ ...props }) => {
             disabled={loading}
             className={classes.submit}
             onClick={(event) => {
-              console.log(event);
+              handleSignInWithGoogle(event);
             }}>
             התחברות עם גוגל
           </Button>

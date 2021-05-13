@@ -4,6 +4,7 @@ import { useAuth } from 'shared/providers/firebaseAuthProvider';
 // destructure props to get authentication and select component to serve
 const PrivateRoute = ({ component: Component, ...rest }: any) => {
   const currentUser = useAuth()!.currentUser;
-  return <Route {...rest} component={() => (currentUser ? <Component /> : <Redirect to='/' />)} />;
+
+  return <Route {...rest} render={() => (currentUser ? <Component {...rest} /> : <Redirect to='/' />)} />;
 };
 export default PrivateRoute;
